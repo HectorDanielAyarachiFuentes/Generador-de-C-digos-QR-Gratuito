@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Códigos QR</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/enhancements.css">
+    <link rel="stylesheet" href="css/predefined.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Generador de Códigos QR</h1>
+            <p>Crea códigos QR personalizados de forma gratuita y fácil</p>
+        </header>
+
+        <main>
+            <div class="qr-generator">
+                <div class="input-section">
+                    <h2>Ingresa tu contenido</h2>
+                    <div class="input-group">
+                        <textarea id="qr-text" placeholder="Escribe texto, URL, información de contacto o cualquier contenido para tu código QR"></textarea>
+                    </div>
+
+                    <div class="predefined-section">
+                        <h2>O elige un QR predefinido</h2>
+                        <div class="predefined-categories">
+                            <button class="category-btn active" data-category="all">Todos</button>
+                            <button class="category-btn" data-category="social">Redes Sociales</button>
+                            <button class="category-btn" data-category="fun">Diversión</button>
+                            <button class="category-btn" data-category="games">Juegos</button>
+                            <button class="category-btn" data-category="challenges">Retos</button>
+                            <button class="category-btn" data-category="quotes">Frases</button>
+                            <button class="category-btn" data-category="memes">Memes</button>
+                            <button class="category-btn" data-category="music">Música</button>
+                            <button class="category-btn" data-category="videos">Videos</button>
+                            <button class="category-btn" data-category="facts">Curiosidades</button>
+                        </div>
+                        <div class="predefined-qr-container" id="predefined-qr-container">
+                            <!-- Los QR predefinidos se cargarán aquí dinámicamente -->
+                            <div class="loading-qr">Cargando QR predefinidos...</div>
+                        </div>
+                    </div>
+
+                    <div class="options-section">
+                        <h2>Personaliza tu código QR</h2>
+                        
+                        <div class="option-group">
+                            <label for="qr-size">Tamaño:</label>
+                            <select id="qr-size">
+                                <option value="100">Pequeño</option>
+                                <option value="200" selected>Mediano</option>
+                                <option value="300">Grande</option>
+                                <option value="400">Extra grande</option>
+                            </select>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="qr-color">Color:</label>
+                            <input type="color" id="qr-color" value="#000000">
+                        </div>
+
+                        <div class="option-group">
+                            <label for="qr-bg-color">Color de fondo:</label>
+                            <input type="color" id="qr-bg-color" value="#FFFFFF">
+                        </div>
+
+                        <div class="option-group">
+                            <label for="qr-error-correction">Nivel de corrección de errores:</label>
+                            <select id="qr-error-correction">
+                                <option value="L">Bajo (7%)</option>
+                                <option value="M" selected>Medio (15%)</option>
+                                <option value="Q">Alto (25%)</option>
+                                <option value="H">Muy alto (30%)</option>
+                            </select>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="qr-logo">Añadir logo (opcional):</label>
+                            <input type="file" id="qr-logo" accept="image/*">
+                        </div>
+
+                        <div class="option-group">
+                            <label for="qr-logo-shape">Forma del logo:</label>
+                            <select id="qr-logo-shape">
+                                <option value="square">Cuadrado</option>
+                                <option value="circle" selected>Círculo</option>
+                                <option value="rounded">Cuadrado redondeado</option>
+                                <option value="shield">Escudo</option>
+                            </select>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="qr-logo-size">Tamaño del logo:</label>
+                            <input type="range" id="qr-logo-size" min="10" max="35" value="25" step="5">
+                            <span id="logo-size-value">25%</span>
+                        </div>
+
+                        <div class="option-group">
+                            <label for="qr-logo-border">Borde del logo:</label>
+                            <select id="qr-logo-border">
+                                <option value="none">Sin borde</option>
+                                <option value="thin" selected>Fino</option>
+                                <option value="medium">Medio</option>
+                                <option value="thick">Grueso</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button id="generate-btn" class="primary-btn">Generar código QR</button>
+                </div>
+
+                <div class="result-section">
+                    <h2>Tu código QR</h2>
+                    <div id="qr-result">
+                        <div id="qr-code-container">
+                            <!-- El código QR se mostrará aquí -->
+                        </div>
+                        <div class="qr-actions">
+                            <button id="download-png-btn" class="action-btn" disabled><i class="fas fa-download"></i> PNG</button>
+                            <button id="download-svg-btn" class="action-btn" disabled><i class="fas fa-download"></i> SVG</button>
+                            <button id="download-pdf-btn" class="action-btn" disabled><i class="fas fa-file-pdf"></i> PDF</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Creado con <i class="fas fa-heart"></i> por Héctor Daniel Ayarachi Fuentes | Generador de Códigos QR gratuito y sin marcas de agua</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/embed.js"></script>
+    <script src="js/predefined.js"></script>
+    <script src="js/cleanup.js"></script>
+</body>
+</html>
