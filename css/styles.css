@@ -343,6 +343,13 @@ input[type="color"] {
     justify-content: center;
     padding: 2rem;
     position: relative;
+    transition: background-color 0.3s;
+}
+
+[data-theme="dark"] .preview-stage {
+    background-color: #0f172a;
+    /* Match body dark bg */
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }
 
 .preview-container {
