@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <style>.cls-1{fill:#6366f1;}.cls-2{fill:none;stroke:#6366f1;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;}</style>
+  </defs>
+  <!-- Outer Frame -->
+  <rect class="cls-2" x="4" y="4" width="56" height="56" rx="12"/>
+  
+  <!-- Position Markers -->
+  <rect class="cls-1" x="14" y="14" width="12" height="12" rx="3"/>
+  <rect class="cls-1" x="38" y="14" width="12" height="12" rx="3"/>
+  <rect class="cls-1" x="14" y="38" width="12" height="12" rx="3"/>
+  
+  <!-- Data bit -->
+  <circle class="cls-1" cx="44" cy="44" r="5"/>
+</svg>
