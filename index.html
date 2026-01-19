@@ -24,115 +24,195 @@
                 </button>
             </div>
             <p>Crea códigos QR únicos</p>
-        </header>
-
-        <div class="tabs-container">
-            <div class="tabs-nav">
-                <button class="tab-btn active" data-tab="text"><i class="fas fa-font"></i> Texto/URL</button>
-                <button class="tab-btn" data-tab="email"><i class="fas fa-envelope"></i> Email</button>
-                <button class="tab-btn" data-tab="wifi"><i class="fas fa-wifi"></i> WiFi</button>
-                <!-- More tabs can be added here -->
-            </div>
-
-            <div class="tab-content active" id="tab-text">
-                <div class="input-group">
-                    <textarea id="qr-text" placeholder="Escribe tu texto o pega una URL aquí..."></textarea>
+            <!-- Navegación por Pestañas -->
+            <div class="tabs-container">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-tab="text"><i class="fas fa-font"></i> Texto</button>
+                    <button class="tab-btn" data-tab="email"><i class="fas fa-envelope"></i> Email</button>
+                    <button class="tab-btn" data-tab="wifi"><i class="fas fa-wifi"></i> WiFi</button>
+                    <button class="tab-btn" data-tab="whatsapp"><i class="fab fa-whatsapp"></i> WA</button>
+                    <button class="tab-btn" data-tab="vcard"><i class="fas fa-address-card"></i> VCard</button>
+                    <button class="tab-btn" data-tab="event"><i class="fas fa-calendar-alt"></i> Evento</button>
                 </div>
-            </div>
 
-            <div class="tab-content" id="tab-email" style="display:none;">
-                <div class="input-group">
-                    <input type="email" id="email-address" placeholder="Dirección de correo">
-                    <input type="text" id="email-subject" placeholder="Asunto">
-                    <textarea id="email-body" placeholder="Mensaje"></textarea>
-                </div>
-            </div>
-
-            <div class="tab-content" id="tab-wifi" style="display:none;">
-                <div class="input-group">
-                    <input type="text" id="wifi-ssid" placeholder="Nombre de la red (SSID)">
-                    <input type="text" id="wifi-password" placeholder="Contraseña">
-                    <select id="wifi-type">
-                        <option value="WPA">WPA/WPA2</option>
-                        <option value="WEP">WEP</option>
-                        <option value="nopass">Sin contraseña</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- Customization Accordion/Section -->
-        <div class="customization-section">
-            <h3><i class="fas fa-sliders-h"></i> Personalización</h3>
-
-            <div class="option-grid">
-                <div class="option-item">
-                    <label>Color QR</label>
-                    <div class="color-picker-wrapper">
-                        <input type="color" id="qr-color" value="#000000">
+                <!-- Contenido Texto/URL -->
+                <div class="tab-content active" id="tab-text">
+                    <div class="input-group">
+                        <label for="qr-text">Texto o URL</label>
+                        <textarea id="qr-text" placeholder="https://ejemplo.com o cualquier texto"></textarea>
                     </div>
                 </div>
-                <div class="option-item">
-                    <label>Fondo</label>
-                    <div class="color-picker-wrapper">
-                        <input type="color" id="qr-bg-color" value="#FFFFFF">
+
+                <!-- Contenido Email -->
+                <div class="tab-content" id="tab-email">
+                    <div class="input-group">
+                        <label for="email-address">Dirección de Email</label>
+                        <input type="email" id="email-address" placeholder="nombre@ejemplo.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="email-subject">Asunto</label>
+                        <input type="text" id="email-subject" placeholder="Asunto del correo">
+                    </div>
+                    <div class="input-group">
+                        <label for="email-body">Mensaje</label>
+                        <textarea id="email-body" placeholder="Cuerpo del mensaje"></textarea>
+                    </div>
+                </div>
+
+                <!-- Contenido WiFi -->
+                <div class="tab-content" id="tab-wifi">
+                    <div class="input-group">
+                        <label for="wifi-ssid">Nombre de Red (SSID)</label>
+                        <input type="text" id="wifi-ssid" placeholder="Mi_WiFi_Casa">
+                    </div>
+                    <div class="input-group">
+                        <label for="wifi-password">Contraseña</label>
+                        <input type="text" id="wifi-password" placeholder="Contraseña123">
+                    </div>
+                    <div class="input-group">
+                        <label for="wifi-type">Tipo de Seguridad</label>
+                        <select id="wifi-type">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">Sin contraseña</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Contenido WhatsApp -->
+                <div class="tab-content" id="tab-whatsapp">
+                    <div class="input-group">
+                        <label for="wa-number">Número (con código país)</label>
+                        <input type="text" id="wa-number" placeholder="+34 600 000 000">
+                    </div>
+                    <div class="input-group">
+                        <label for="wa-message">Mensaje</label>
+                        <textarea id="wa-message" placeholder="Hola, me gustaría más información..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Contenido VCard -->
+                <div class="tab-content" id="tab-vcard">
+                    <div class="input-group">
+                        <label for="vcard-name">Nombre Completo</label>
+                        <input type="text" id="vcard-name" placeholder="Juan Pérez">
+                    </div>
+                    <div class="input-group">
+                        <label for="vcard-phone">Teléfono</label>
+                        <input type="text" id="vcard-phone" placeholder="+1 234 567 890">
+                    </div>
+                    <div class="input-group">
+                        <label for="vcard-email">Email</label>
+                        <input type="email" id="vcard-email" placeholder="juan@empresa.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="vcard-org">Empresa</label>
+                        <input type="text" id="vcard-org" placeholder="Mi Empresa S.L.">
+                    </div>
+                </div>
+
+                <!-- Contenido Evento -->
+                <div class="tab-content" id="tab-event">
+                    <div class="input-group">
+                        <label for="event-title">Título del Evento</label>
+                        <input type="text" id="event-title" placeholder="Fiesta de Cumpleaños">
+                    </div>
+                    <div class="input-group">
+                        <label for="event-location">Ubicación</label>
+                        <input type="text" id="event-location" placeholder="Calle Falsa 123">
+                    </div>
+                    <div class="input-group">
+                        <label for="event-start">Inicio (Fecha y Hora)</label>
+                        <input type="datetime-local" id="event-start">
+                    </div>
+                    <div class="input-group">
+                        <label for="event-end">Fin (Fecha y Hora)</label>
+                        <input type="datetime-local" id="event-end">
                     </div>
                 </div>
             </div>
 
-            <div class="option-group">
-                <label>Logo (Centro)</label>
-                <div class="file-input-wrapper">
-                    <input type="file" id="qr-logo" accept="image/*">
-                    <span class="file-label"><i class="fas fa-upload"></i> Subir imagen</span>
+            <!-- Customization Accordion/Section -->
+            <div class="customization-section">
+                <h3><i class="fas fa-sliders-h"></i> Personalización</h3>
+
+                <div class="option-grid">
+                    <div class="option-item">
+                        <label>Color QR</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="qr-color" value="#000000">
+                        </div>
+                    </div>
+                    <div class="option-item">
+                        <label>Fondo</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="qr-bg-color" value="#FFFFFF">
+                        </div>
+                    </div>
                 </div>
+
+                <div class="option-group">
+                    <label>Logo (Centro)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="qr-logo" accept="image/*">
+                        <span class="file-label"><i class="fas fa-upload"></i> Subir imagen</span>
+                    </div>
+                </div>
+
+                <div class="option-grid">
+                    <div class="option-item">
+                        <label>Forma Logo</label>
+                        <select id="qr-logo-shape">
+                            <option value="circle" selected>Círculo</option>
+                            <option value="square">Cuadrado</option>
+                            <option value="rounded">Redondeado</option>
+                            <option value="shield">Escudo</option>
+                        </select>
+                    </div>
+                    <div class="option-item">
+                        <label>Tamaño Logo</label>
+                        <input type="range" id="qr-logo-size" min="10" max="35" value="25" step="5">
+                    </div>
+                </div>
+                <!-- Size and Quality hidden or minimized as advanced options if needed, keeping it simple for now -->
+                <input type="hidden" id="qr-size" value="1000"> <!-- Default high res -->
+                <input type="hidden" id="qr-error-correction" value="H"> <!-- Default High error correction -->
+                <input type="hidden" id="qr-logo-border" value="thin">
             </div>
 
-            <div class="option-grid">
-                <div class="option-item">
-                    <label>Forma Logo</label>
-                    <select id="qr-logo-shape">
-                        <option value="circle" selected>Círculo</option>
-                        <option value="square">Cuadrado</option>
-                        <option value="rounded">Redondeado</option>
-                        <option value="shield">Escudo</option>
-                    </select>
-                </div>
-                <div class="option-item">
-                    <label>Tamaño Logo</label>
-                    <input type="range" id="qr-logo-size" min="10" max="35" value="25" step="5">
+            <button id="generate-btn" class="generate-btn">
+                <i class="fas fa-magic"></i> Generar QR
+            </button>
+            <!-- Historial -->
+            <div class="history-section">
+                <h3><i class="fas fa-history"></i> Historial Reciente</h3>
+                <div id="history-list" class="history-list">
+                    <p class="empty-history">No hay escaneos recientes</p>
                 </div>
             </div>
-            <!-- Size and Quality hidden or minimized as advanced options if needed, keeping it simple for now -->
-            <input type="hidden" id="qr-size" value="1000"> <!-- Default high res -->
-            <input type="hidden" id="qr-error-correction" value="H"> <!-- Default High error correction -->
-            <input type="hidden" id="qr-logo-border" value="thin">
-        </div>
-
-        <button id="generate-btn" class="generate-btn">
-            <i class="fas fa-magic"></i> Generar QR
-        </button>
     </aside>
 
     <!-- Main Stage / Protagonist Section -->
     <main class="preview-stage">
         <div class="preview-container">
-            <div class="qr-card" id="qr-result">
+            <div class="qr-card" id="qr-card">
                 <div class="qr-placeholder" id="qr-placeholder">
                     <i class="fas fa-qrcode"></i>
                     <p>Tu código QR aparecerá aquí</p>
                 </div>
-                <div id="qr-code-container">
+                <div id="qr-code-container" style="display: none;">
                     <!-- Canvas will be injected here -->
                 </div>
             </div>
 
             <div class="action-bar">
+                <div class="download-options">
+                    <label class="frame-checkbox">
+                        <input type="checkbox" id="add-frame-checkbox"> Añadir Marco "Escanéame"
+                    </label>
+                </div>
                 <button id="download-png-btn" class="action-btn" disabled>
                     <i class="fas fa-download"></i> PNG
-                </button>
-                <button id="download-svg-btn" class="action-btn" disabled>
-                    <i class="fas fa-download"></i> SVG
                 </button>
                 <button id="download-pdf-btn" class="action-btn" disabled>
                     <i class="fas fa-file-pdf"></i> PDF

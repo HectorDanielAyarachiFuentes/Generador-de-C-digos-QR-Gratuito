@@ -1,6 +1,13 @@
 // Variables globales
 let qrCode = null;
 let logoImage = null;
+let scanHistory = (() => {
+    try {
+        return JSON.parse(localStorage.getItem('qr_history')) || [];
+    } catch (e) {
+        return [];
+    }
+})();
 
 // Elementos del DOM
 const qrText = document.getElementById('qr-text');
@@ -14,8 +21,9 @@ const generateBtn = document.getElementById('generate-btn');
 const qrCodeContainer = document.getElementById('qr-code-container');
 const qrPlaceholder = document.getElementById('qr-placeholder');
 const downloadPngBtn = document.getElementById('download-png-btn');
-const downloadSvgBtn = document.getElementById('download-svg-btn');
 const downloadPdfBtn = document.getElementById('download-pdf-btn');
+const addFrameCheckbox = document.getElementById('add-frame-checkbox');
+const historyList = document.getElementById('history-list');
 
 // Tab Elements
 const tabBtns = document.querySelectorAll('.tab-btn');
@@ -31,6 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     htmlElement.setAttribute('data-theme', savedTheme);
     updateThemeIcon(savedTheme);
+
+    // Load History
+    renderHistory();
 
     // Theme Toggle
     themeToggle.addEventListener('click', () => {
@@ -64,13 +75,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Eventos
-    generateBtn.addEventListener('click', generateQRCode);
+    generateBtn.addEventListener('click', () => {
+        generateQRCode();
+        saveHistory();
+    });
     qrLogo.addEventListener('change', handleLogoUpload);
     downloadPngBtn.addEventListener('click', () => downloadQR('png'));
-    downloadSvgBtn.addEventListener('click', () => downloadQR('svg'));
     downloadPdfBtn.addEventListener('click', () => downloadQR('pdf'));
 
-    // Auto-update on customization change if QR exists
+    // Live Preview & Auto-update
+    // Listen to all inputs that might affect QR content
+    const inputSelectors = [
+        '#qr-text',
+        '#email-address', '#email-subject', '#email-body',
+        '#wifi-ssid', '#wifi-password', '#wifi-type',
+        '#wa-number', '#wa-message',
+        '#vcard-name', '#vcard-phone', '#vcard-email', '#vcard-org',
+        '#event-title', '#event-location', '#event-start', '#event-end'
+    ];
+
+    const debounce = (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    };
+
+    const debouncedGenerate = debounce(generateQRCode, 300);
+
+    // Add listeners to content inputs
+    document.querySelectorAll(inputSelectors.join(',')).forEach(input => {
+        input.addEventListener('input', debouncedGenerate);
+    });
+
+    // Add listeners to customization inputs
     [qrColor, qrBgColor, qrLogoShape, qrLogoSize, qrLogoBorder].forEach(el => {
         if (el) {
             el.addEventListener('input', () => {
@@ -109,189 +152,214 @@ function getQRContent() {
     const tabId = activeTabObj ? activeTabObj.id : 'tab-text';
 
     if (tabId === 'tab-text') {
-        const text = document.getElementById('qr-text').value.trim();
-        return text;
+        return { text: document.getElementById('qr-text').value.trim(), type: 'text' };
     } else if (tabId === 'tab-email') {
         const email = document.getElementById('email-address').value.trim();
         const subject = document.getElementById('email-subject').value.trim();
         const body = document.getElementById('email-body').value.trim();
-        if (!email) return '';
-        return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        if (!email) return null;
+        return {
+            text: `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+            type: 'email',
+            label: email
+        };
     } else if (tabId === 'tab-wifi') {
         const ssid = document.getElementById('wifi-ssid').value.trim();
         const password = document.getElementById('wifi-password').value.trim();
         const type = document.getElementById('wifi-type').value;
-        if (!ssid) return '';
-        return `WIFI:S:${ssid};T:${type};P:${password};;`;
+        if (!ssid) return null;
+        return {
+            text: `WIFI:S:${ssid};T:${type};P:${password};;`,
+            type: 'wifi',
+            label: `WiFi: ${ssid}`
+        };
+    } else if (tabId === 'tab-whatsapp') {
+        const phone = document.getElementById('wa-number').value.trim();
+        const msg = document.getElementById('wa-message').value.trim();
+        if (!phone) return null;
+        return {
+            text: `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(msg)}`,
+            type: 'whatsapp',
+            label: `WA: ${phone}`
+        };
+    } else if (tabId === 'tab-vcard') {
+        const name = document.getElementById('vcard-name').value.trim();
+        const phone = document.getElementById('vcard-phone').value.trim();
+        const email = document.getElementById('vcard-email').value.trim();
+        const org = document.getElementById('vcard-org').value.trim();
+        if (!name) return null;
+        const vcard = `BEGIN:VCARD\nVERSION:3.0\nN:${name}\nFN:${name}\nORG:${org}\nTEL:${phone}\nEMAIL:${email}\nEND:VCARD`;
+        return {
+            text: vcard,
+            type: 'vcard',
+            label: `Contact: ${name}`
+        };
+    } else if (tabId === 'tab-event') {
+        const title = document.getElementById('event-title').value.trim();
+        const loc = document.getElementById('event-location').value.trim();
+        // Simple formatDate for VEVENT (yyyymmddThhmmss) - assumes local time input
+        const formatDate = (val) => val ? val.replace(/[-:]/g, '').replace(' ', 'T') + '00' : '';
+        const start = formatDate(document.getElementById('event-start').value);
+        const end = formatDate(document.getElementById('event-end').value);
+        if (!title) return null;
+        const vevent = `BEGIN:VEVENT\nSUMMARY:${title}\nLOCATION:${loc}\nDTSTART:${start}\nDTEND:${end}\nEND:VEVENT`;
+        return {
+            text: vevent,
+            type: 'event',
+            label: `Event: ${title}`
+        };
     }
-    return '';
+    return null;
 }
 
 // Función principal para generar el código QR
 function generateQRCode() {
-    const text = getQRContent();
+    const content = getQRContent();
 
-    if (!text) {
-        showMessage('Por favor, ingresa el contenido necesario para generar el código QR', 'error');
+    if (!content || !content.text) {
+        // Don't error on live preview if empty, just clear or ignore
+        // If triggered by button, maybe show error? 
+        // For smoother UX, if empty, show placeholder
+        if (qrPlaceholder.style.display === 'none') {
+            // Don't revert if we already have one, just don't update
+        }
         return;
     }
 
-    const size = 1000; // High res default
+    const size = 1000;
     const color = qrColor.value;
     const bgColor = qrBgColor.value;
-    const errorCorrectionLevel = 'H'; // Always High for better logo support
+    const errorCorrectionLevel = 'H';
 
-    // UI Updates
     qrPlaceholder.style.display = 'none';
     qrCodeContainer.style.display = 'flex';
-
-    // Limpiar el contenedor
     qrCodeContainer.innerHTML = '';
 
-    // Crear el canvas para el QR
     const canvas = document.createElement('canvas');
     canvas.id = 'qr-canvas';
     qrCodeContainer.appendChild(canvas);
 
-    // Generar el código QR usando QRious
     qrCode = new QRious({
         element: canvas,
-        value: text,
+        value: content.text,
         size: size,
         level: errorCorrectionLevel,
         background: bgColor,
         foreground: color
     });
 
-    // Crear un canvas temporal para guardar el QR original
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = size;
-    tempCanvas.height = size;
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.drawImage(canvas, 0, 0);
-
-    // Si hay un logo, añadirlo al centro del QR
     if (logoImage) {
-        addLogoToQR(canvas, logoImage, size, tempCanvas);
+        // Create temp canvas for logo processing if needed, 
+        // but addLogoToQR draws directly on main canvas
+        addLogoToQR(canvas, logoImage, size);
     }
 
-    // Habilitar los botones de descarga
     enableDownloadButtons();
 
-    // Añadir clase para animación
-    canvas.classList.remove('fade-in');
-    void canvas.offsetWidth; // Trigger reflow
-    canvas.classList.add('fade-in');
+    // Animation only if not already visible (to avoid flickering on typing)
+    if (!canvas.classList.contains('active-qr')) {
+        canvas.classList.add('fade-in');
+        canvas.classList.add('active-qr');
+    }
 }
 
-// Función para añadir logo al centro del QR
-function addLogoToQR(canvas, logoImg, size, tempCanvas) {
-    const ctx = canvas.getContext('2d');
+// Función para guardar historial
+function saveHistory() {
+    const content = getQRContent();
+    if (!content) return;
 
-    // Obtener valores de personalización
+    // Avoid duplicates
+    const exists = scanHistory.some(h => h.text === content.text);
+    if (exists) return;
+
+    const entry = {
+        text: content.text,
+        type: content.type,
+        label: content.label || content.text.substring(0, 20) + '...',
+        date: new Date().toLocaleDateString()
+    };
+
+    scanHistory.unshift(entry);
+    if (scanHistory.length > 10) scanHistory.pop(); // Keep last 10
+
+    localStorage.setItem('qr_history', JSON.stringify(scanHistory));
+    renderHistory();
+}
+
+function renderHistory() {
+    historyList.innerHTML = '';
+    if (scanHistory.length === 0) {
+        historyList.innerHTML = '<p class="empty-history">No hay escaneos recientes</p>';
+        return;
+    }
+
+    scanHistory.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        let iconClass = 'fa-qrcode';
+        if (item.type === 'wifi') iconClass = 'fa-wifi';
+        if (item.type === 'email') iconClass = 'fa-envelope';
+        if (item.type === 'whatsapp') iconClass = 'fab fa-whatsapp';
+        if (item.type === 'vcard') iconClass = 'fa-address-card';
+        if (item.type === 'event') iconClass = 'fa-calendar-alt';
+
+        div.innerHTML = `<i class="${iconClass}"></i> <span>${item.label}</span>`;
+        div.onclick = () => {
+            // Load content back to generic text tab mostly because parsing back to specific inputs is hard
+            // For now, let's just generate the QR directly from text
+            // To be perfect, we'd map it back to inputs, but for "Quick History" regenerating the QR is key.
+            // We'll switch to text tab and fill it.
+            document.querySelector('[data-tab="text"]').click();
+            document.getElementById('qr-text').value = item.text;
+            generateQRCode();
+        };
+        historyList.appendChild(div);
+    });
+}
+
+
+// Función para añadir logo al centro del QR
+function addLogoToQR(canvas, logoImg, size) {
+    const ctx = canvas.getContext('2d');
     const logoShape = qrLogoShape.value;
     const logoSizePercent = parseInt(qrLogoSize.value) / 100;
-    const logoBorderStr = document.getElementById('qr-logo-border') ? document.getElementById('qr-logo-border').value : 'thin';
 
     const maxLogoSizePercent = 0.30;
     const actualLogoSizePercent = Math.min(logoSizePercent, maxLogoSizePercent);
 
-    // Calcular tamaño del logo basado en el porcentaje seleccionado
     const logoSize = size * actualLogoSizePercent;
     const logoX = (size - logoSize) / 2;
     const logoY = (size - logoSize) / 2;
 
-    // Crear un fondo blanco para el logo (zona de seguridad)
-    ctx.fillStyle = '#FFFFFF'; // Could match bg color but white is safer for logos usually
-    if (qrBgColor.value) ctx.fillStyle = qrBgColor.value;
-
-
-    // Dibujar el fondo según la forma seleccionada
-    switch (logoShape) {
-        case 'circle':
-            ctx.beginPath();
-            const radius = logoSize / 2;
-            ctx.arc(logoX + radius, logoY + radius, radius + 2, 0, Math.PI * 2, true);
-            ctx.closePath();
-            ctx.fill();
-            break;
-        case 'rounded':
-            ctx.beginPath();
-            const cornerRadius = logoSize * 0.2;
-            drawRoundedRect(ctx, logoX - 2, logoY - 2, logoSize + 4, logoSize + 4, cornerRadius + 2);
-            ctx.fill();
-            break;
-        case 'shield':
-            ctx.beginPath();
-            drawShield(ctx, logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
-            ctx.fill();
-            break;
-        case 'square':
-        default:
-            ctx.fillRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
-            break;
-    }
-
     ctx.save();
 
-    // Aplicar la forma seleccionada como recorte
-    switch (logoShape) {
-        case 'circle':
-            ctx.beginPath();
-            const radius = logoSize / 2;
-            ctx.arc(logoX + radius, logoY + radius, radius, 0, Math.PI * 2, true);
-            ctx.closePath();
-            ctx.clip();
-            break;
-        case 'rounded':
-            ctx.beginPath();
-            const cornerRadius = logoSize * 0.2;
-            drawRoundedRect(ctx, logoX, logoY, logoSize, logoSize, cornerRadius);
-            ctx.clip();
-            break;
-        case 'shield':
-            ctx.beginPath();
-            drawShield(ctx, logoX, logoY, logoSize, logoSize);
-            ctx.clip();
-            break;
-        case 'square':
-        default:
-            ctx.beginPath();
-            ctx.rect(logoX, logoY, logoSize, logoSize);
-            ctx.clip();
-            break;
-    }
+    // Background for logo
+    ctx.fillStyle = qrBgColor.value || '#FFFFFF';
 
-    // Dibujar el logo en el centro
-    const aspectRatio = logoImg.width / logoImg.height;
-    let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
-
-    if (aspectRatio > 1) {
-        drawWidth = logoSize;
-        drawHeight = logoSize / aspectRatio;
-        offsetY = (logoSize - drawHeight) / 2;
+    // Draw Shape
+    ctx.beginPath();
+    if (logoShape === 'circle') {
+        const radius = logoSize / 2;
+        ctx.arc(logoX + radius, logoY + radius, radius + 2, 0, Math.PI * 2);
+    } else if (logoShape === 'rounded') {
+        drawRoundedRect(ctx, logoX - 2, logoY - 2, logoSize + 4, logoSize + 4, logoSize * 0.2);
+    } else if (logoShape === 'shield') {
+        drawShield(ctx, logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
     } else {
-        drawHeight = logoSize;
-        drawWidth = logoSize * aspectRatio;
-        offsetX = (logoSize - drawWidth) / 2;
+        ctx.rect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
     }
+    ctx.fill();
+    ctx.clip(); // Clip subsequent drawing to this shape
 
-    ctx.drawImage(
-        logoImg,
-        0, 0, logoImg.width, logoImg.height,
-        logoX + offsetX, logoY + offsetY, drawWidth, drawHeight
-    );
+    // Draw Image
+    ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
 
     ctx.restore();
-
-    // Restaurar los módulos de posicionamiento del QR
-    // No always strictly necessary with high error correction and keeping logo small, but good practice.
-    // Simplifying for this version to ensure clean render: re-drawing the corners isn't always pixel-perfect if canvas sizes differ.
-    // If we use 'H' correction and <30% size, it usually scans fine without restoring modules under the logo.
 }
 
 // Función auxiliar para dibujar un rectángulo redondeado
 function drawRoundedRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
     ctx.moveTo(x + radius, y);
     ctx.lineTo(x + width - radius, y);
     ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
@@ -304,8 +372,8 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
     ctx.closePath();
 }
 
-// Función auxiliar para dibujar un escudo
 function drawShield(ctx, x, y, width, height) {
+    ctx.beginPath();
     ctx.moveTo(x + width / 2, y);
     ctx.lineTo(x + width, y + height * 0.3);
     ctx.lineTo(x + width, y + height * 0.7);
@@ -318,15 +386,56 @@ function drawShield(ctx, x, y, width, height) {
 // Función para habilitar los botones de descarga
 function enableDownloadButtons() {
     downloadPngBtn.disabled = false;
-    downloadSvgBtn.disabled = false;
     downloadPdfBtn.disabled = false;
 }
+
+// Función para añadir marco
+function addFrameToCanvas(originalCanvas) {
+    const frameCanvas = document.createElement('canvas');
+    const ctx = frameCanvas.getContext('2d');
+    const padding = 100;
+    const textHeight = 150;
+    const originalSize = originalCanvas.width;
+
+    const width = originalSize + (padding * 2);
+    const height = originalSize + (padding * 2) + textHeight;
+
+    frameCanvas.width = width;
+    frameCanvas.height = height;
+
+    // Background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    // Border
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 20;
+    ctx.strokeRect(20, 20, width - 40, height - 40);
+
+    // Text
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 80px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText("¡ESCANÉAME!", width / 2, height - 80);
+
+    // Draw QR
+    ctx.drawImage(originalCanvas, padding, padding);
+
+    return frameCanvas;
+}
+
 
 // Función para descargar el QR
 function downloadQR(format) {
     if (!qrCode) return;
 
-    const canvas = document.getElementById('qr-canvas');
+    let canvas = document.getElementById('qr-canvas');
+
+    // Check for frame
+    if (addFrameCheckbox.checked) {
+        canvas = addFrameToCanvas(canvas);
+    }
+
     const filename = `qr-code-${Date.now()}`;
 
     switch (format) {
@@ -335,30 +444,23 @@ function downloadQR(format) {
                 saveAs(blob, `${filename}.png`);
             });
             break;
-        case 'svg':
-            // Simplest SVG export for now: re-use canvas data or alert feature
-            // Since we are doing complex canvas drawing (images, clips), pure SVG generation is complex.
-            // We can export the canvas as an image inside an SVG wrapper if needed, or just warn.
-            // For this "Protagonsit" update, let's stick to PNG/Canvas-based PDF as primary high-quality outputs.
-            // But let's try a basic SVG construction if requested, mirroring the old logic but simplified.
-            alert("La exportación a SVG con logos complejos se está optimizando. Por ahora se recomienda PNG para máxima calidad.");
-            break;
         case 'pdf':
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            // Calculate ratio to fit A4 (210mm width) with margins
             const imgData = canvas.toDataURL('image/png');
-            pdf.addImage(imgData, 'PNG', 55, 50, 100, 100);
+            const pdfWidth = 150;
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 30, 30, pdfWidth, pdfHeight);
             pdf.save(`${filename}.pdf`);
             break;
     }
+    showMessage(`QR descargado: ${format.toUpperCase()}`, 'success');
 }
 
 // Función para mostrar mensajes
 function showMessage(message, type = 'info') {
-    // Simple alert or toast could be added here
-    // For now, using standard alert or a console log effectively, 
-    // or we can re-implement a toast container if the HTML supports it.
-    // Let's create a dynamic toast.
     let toast = document.createElement('div');
     toast.style.position = 'fixed';
     toast.style.bottom = '20px';

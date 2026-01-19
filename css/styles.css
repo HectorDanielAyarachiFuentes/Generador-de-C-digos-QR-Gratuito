@@ -147,6 +147,8 @@ body {
 
 .tabs-nav {
     display: flex;
+    flex-wrap: wrap;
+    /* Allow wrapping */
     gap: 0.5rem;
     margin-bottom: 1rem;
     border-bottom: 1px solid var(--border-color);
@@ -417,12 +419,18 @@ input[type="color"] {
 .action-bar {
     display: flex;
     gap: 1rem;
-    background: white;
+    background: var(--panel-bg);
     padding: 0.75rem 1.5rem;
     border-radius: 50px;
     /* Pill shape */
     box-shadow: var(--shadow-md);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .action-bar {
+    background-color: #0d1117 !important;
+    /* Extremely dark for contrast */
+    border-color: #30363d !important;
 }
 
 .action-btn {
@@ -448,6 +456,76 @@ input[type="color"] {
 .action-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+/* History Section */
+.history-section {
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.5rem;
+}
+
+.history-section h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.history-item {
+    background: var(--bg-color);
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.history-item:hover {
+    border-color: var(--primary-color);
+    transform: translateX(2px);
+}
+
+.history-item i {
+    color: var(--primary-color);
+}
+
+.empty-history {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Download Options */
+.download-options {
+    display: flex;
+    align-items: center;
+    margin-right: auto;
+    /* Push buttons to right */
+    padding-right: 1rem;
+}
+
+.frame-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.1);
+    /* Subtle highlighting */
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md);
 }
 
 /* Responsive adjustments */
