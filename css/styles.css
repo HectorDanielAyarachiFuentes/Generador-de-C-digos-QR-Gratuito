@@ -16,6 +16,44 @@
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+[data-theme="dark"] {
+    --primary-color: #818cf8;
+    /* Light Indigo */
+    --primary-hover: #6366f1;
+    --bg-color: #0f172a;
+    /* Slate 900 */
+    --panel-bg: #1e293b;
+    /* Slate 800 */
+    --text-main: #f1f5f9;
+    /* Slate 100 */
+    --text-muted: #94a3b8;
+    /* Slate 400 */
+    --border-color: #334155;
+    /* Slate 700 */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .qr-card {
+    background: #ffffff;
+    /* QR Card keeps white storage for contrast/scanning or needs specific handling */
+    /* If we want the card to be dark, we need to make sure the QR itself handles contrast. 
+       Usually best to keep the "paper" white or offer a specific 'transparent' mode. 
+       For "Protagonist" look, let's keep the card white for the QR to pop, 
+       OR make the card dark but the QR area white. 
+       Let's stick to a white card for the QR area for now to ensure scanability 
+       unless user overrides QR bg color. 
+    */
+    background: var(--panel-bg);
+}
+
+/* Specific override for QR display area in dark mode to ensure visibility if user doesn't set BG */
+[data-theme="dark"] .qr-placeholder {
+    color: var(--text-muted);
+}
+
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -29,6 +67,7 @@ body {
     height: 100vh;
     overflow: hidden;
     /* App-like feel */
+    transition: background-color 0.3s, color 0.3s;
 }
 
 /* App Layout */
@@ -50,11 +89,40 @@ body {
     flex-shrink: 0;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02);
     z-index: 10;
+    transition: background-color 0.3s, border-color 0.3s;
 }
 
 .app-header {
     margin-bottom: 2rem;
     text-align: center;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.theme-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.theme-btn:hover {
+    background-color: var(--bg-color);
+    color: var(--primary-color);
 }
 
 .logo {
@@ -65,7 +133,6 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
 }
 
 .app-header p {
@@ -102,13 +169,15 @@ body {
 }
 
 .tab-btn:hover {
-    background-color: #f9fafb;
+    background-color: var(--bg-color);
+    /* Updated for theme */
     color: var(--text-main);
 }
 
 .tab-btn.active {
     color: var(--primary-color);
-    background-color: #eef2ff;
+    background-color: rgba(99, 102, 241, 0.1);
+    /* Transparent primary */
 }
 
 .input-group {
@@ -124,10 +193,13 @@ select {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid var(--border-color);
+    background-color: var(--panel-bg);
+    /* Match panel bg */
+    color: var(--text-main);
     border-radius: var(--radius-md);
     font-family: inherit;
     font-size: 0.95rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
 }
 
 textarea:focus,

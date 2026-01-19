@@ -21,8 +21,27 @@ const downloadPdfBtn = document.getElementById('download-pdf-btn');
 const tabBtns = document.querySelectorAll('.tab-btn');
 const tabContents = document.querySelectorAll('.tab-content');
 
+// Theme Elements
+const themeToggle = document.getElementById('theme-toggle');
+const htmlElement = document.documentElement;
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    htmlElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    // Theme Toggle
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = htmlElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+        htmlElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+
     // Tab Switching
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -50,10 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
     downloadPngBtn.addEventListener('click', () => downloadQR('png'));
     downloadSvgBtn.addEventListener('click', () => downloadQR('svg'));
     downloadPdfBtn.addEventListener('click', () => downloadQR('pdf'));
-    
+
     // Auto-update on customization change if QR exists
     [qrColor, qrBgColor, qrLogoShape, qrLogoSize, qrLogoBorder].forEach(el => {
-        if(el) {
+        if (el) {
             el.addEventListener('input', () => {
                 if (qrCode) generateQRCode();
             });
@@ -66,14 +85,14 @@ function handleLogoUpload(e) {
     const file = e.target.files[0];
     if (!file) {
         logoImage = null;
-        if(qrCode) generateQRCode();
+        if (qrCode) generateQRCode();
         return;
     }
 
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
         const img = new Image();
-        img.onload = function() {
+        img.onload = function () {
             logoImage = img;
             if (qrCode) {
                 generateQRCode();
@@ -111,7 +130,7 @@ function getQRContent() {
 // Función principal para generar el código QR
 function generateQRCode() {
     const text = getQRContent();
-    
+
     if (!text) {
         showMessage('Por favor, ingresa el contenido necesario para generar el código QR', 'error');
         return;
@@ -158,7 +177,7 @@ function generateQRCode() {
 
     // Habilitar los botones de descarga
     enableDownloadButtons();
-    
+
     // Añadir clase para animación
     canvas.classList.remove('fade-in');
     void canvas.offsetWidth; // Trigger reflow
@@ -168,53 +187,53 @@ function generateQRCode() {
 // Función para añadir logo al centro del QR
 function addLogoToQR(canvas, logoImg, size, tempCanvas) {
     const ctx = canvas.getContext('2d');
-    
+
     // Obtener valores de personalización
     const logoShape = qrLogoShape.value;
     const logoSizePercent = parseInt(qrLogoSize.value) / 100;
     const logoBorderStr = document.getElementById('qr-logo-border') ? document.getElementById('qr-logo-border').value : 'thin';
-    
-    const maxLogoSizePercent = 0.30; 
+
+    const maxLogoSizePercent = 0.30;
     const actualLogoSizePercent = Math.min(logoSizePercent, maxLogoSizePercent);
-    
+
     // Calcular tamaño del logo basado en el porcentaje seleccionado
     const logoSize = size * actualLogoSizePercent;
     const logoX = (size - logoSize) / 2;
     const logoY = (size - logoSize) / 2;
-    
+
     // Crear un fondo blanco para el logo (zona de seguridad)
     ctx.fillStyle = '#FFFFFF'; // Could match bg color but white is safer for logos usually
-    if(qrBgColor.value) ctx.fillStyle = qrBgColor.value;
+    if (qrBgColor.value) ctx.fillStyle = qrBgColor.value;
 
-    
+
     // Dibujar el fondo según la forma seleccionada
     switch (logoShape) {
         case 'circle':
             ctx.beginPath();
             const radius = logoSize / 2;
-            ctx.arc(logoX + radius, logoY + radius, radius + 2, 0, Math.PI * 2, true); 
+            ctx.arc(logoX + radius, logoY + radius, radius + 2, 0, Math.PI * 2, true);
             ctx.closePath();
             ctx.fill();
             break;
         case 'rounded':
             ctx.beginPath();
             const cornerRadius = logoSize * 0.2;
-            drawRoundedRect(ctx, logoX - 2, logoY - 2, logoSize + 4, logoSize + 4, cornerRadius + 2); 
+            drawRoundedRect(ctx, logoX - 2, logoY - 2, logoSize + 4, logoSize + 4, cornerRadius + 2);
             ctx.fill();
             break;
         case 'shield':
             ctx.beginPath();
-            drawShield(ctx, logoX - 2, logoY - 2, logoSize + 4, logoSize + 4); 
+            drawShield(ctx, logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
             ctx.fill();
             break;
         case 'square':
         default:
-            ctx.fillRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4); 
+            ctx.fillRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
             break;
     }
-    
+
     ctx.save();
-    
+
     // Aplicar la forma seleccionada como recorte
     switch (logoShape) {
         case 'circle':
@@ -242,11 +261,11 @@ function addLogoToQR(canvas, logoImg, size, tempCanvas) {
             ctx.clip();
             break;
     }
-    
+
     // Dibujar el logo en el centro
     const aspectRatio = logoImg.width / logoImg.height;
     let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
-    
+
     if (aspectRatio > 1) {
         drawWidth = logoSize;
         drawHeight = logoSize / aspectRatio;
@@ -256,15 +275,15 @@ function addLogoToQR(canvas, logoImg, size, tempCanvas) {
         drawWidth = logoSize * aspectRatio;
         offsetX = (logoSize - drawWidth) / 2;
     }
-    
+
     ctx.drawImage(
         logoImg,
         0, 0, logoImg.width, logoImg.height,
         logoX + offsetX, logoY + offsetY, drawWidth, drawHeight
     );
-    
+
     ctx.restore();
-    
+
     // Restaurar los módulos de posicionamiento del QR
     // No always strictly necessary with high error correction and keeping logo small, but good practice.
     // Simplifying for this version to ensure clean render: re-drawing the corners isn't always pixel-perfect if canvas sizes differ.
@@ -312,17 +331,17 @@ function downloadQR(format) {
 
     switch (format) {
         case 'png':
-            canvas.toBlob(function(blob) {
+            canvas.toBlob(function (blob) {
                 saveAs(blob, `${filename}.png`);
             });
             break;
         case 'svg':
-             // Simplest SVG export for now: re-use canvas data or alert feature
-             // Since we are doing complex canvas drawing (images, clips), pure SVG generation is complex.
-             // We can export the canvas as an image inside an SVG wrapper if needed, or just warn.
-             // For this "Protagonsit" update, let's stick to PNG/Canvas-based PDF as primary high-quality outputs.
-             // But let's try a basic SVG construction if requested, mirroring the old logic but simplified.
-             alert("La exportación a SVG con logos complejos se está optimizando. Por ahora se recomienda PNG para máxima calidad.");
+            // Simplest SVG export for now: re-use canvas data or alert feature
+            // Since we are doing complex canvas drawing (images, clips), pure SVG generation is complex.
+            // We can export the canvas as an image inside an SVG wrapper if needed, or just warn.
+            // For this "Protagonsit" update, let's stick to PNG/Canvas-based PDF as primary high-quality outputs.
+            // But let's try a basic SVG construction if requested, mirroring the old logic but simplified.
+            alert("La exportación a SVG con logos complejos se está optimizando. Por ahora se recomienda PNG para máxima calidad.");
             break;
         case 'pdf':
             const { jsPDF } = window.jspdf;
@@ -356,4 +375,16 @@ function showMessage(message, type = 'info') {
     setTimeout(() => {
         toast.remove();
     }, 3000);
+}
+
+// Función para actualizar el icono del tema
+function updateThemeIcon(theme) {
+    const icon = themeToggle.querySelector('i');
+    if (theme === 'dark') {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+    } else {
+        icon.classList.remove('fa-sun');
+        icon.classList.add('fa-moon');
+    }
 }
