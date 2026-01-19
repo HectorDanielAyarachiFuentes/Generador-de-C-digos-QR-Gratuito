@@ -8,6 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/predefined.css">
     <link rel="stylesheet" href="css/enhancements.css">
     <link rel="stylesheet" href="css/predefined.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -182,6 +183,17 @@
                 <input type="hidden" id="qr-logo-border" value="thin">
             </div>
 
+            <!-- Predefined Designs Section -->
+            <div class="predefined-section">
+                <h3><i class="fas fa-palette"></i> Diseños Predefinidos</h3>
+                <div class="predefined-categories">
+                    <!-- Categories injected by JS -->
+                </div>
+                <div id="predefined-qr-container" class="predefined-qr-container">
+                    <!-- QRs injected by JS -->
+                </div>
+            </div>
+
             <button id="generate-btn" class="generate-btn">
                 <i class="fas fa-magic"></i> Generar QR
             </button>
@@ -228,6 +240,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="js/predefined.js"></script>
 <script src="js/script.js"></script>
 <!-- Removed older scripts likely not needed with new logic or handled efficiently in script.js -->
 </body>

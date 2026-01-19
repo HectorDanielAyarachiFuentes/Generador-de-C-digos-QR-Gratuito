@@ -41,7 +41,7 @@ const predefinedQRs = [
         background: "#FFFFFF",
         description: "Negro clásico y sofisticado"
     },
-    
+
     // COLORES SECUNDARIOS
     {
         id: 6,
@@ -83,7 +83,7 @@ const predefinedQRs = [
         background: "#FFFFFF",
         description: "Verde lima fresco y juvenil"
     },
-    
+
     // FONDOS COLORIDOS
     {
         id: 11,
@@ -165,7 +165,7 @@ const predefinedQRs = [
         background: "#FFA000",
         description: "Fondo ámbar con código oscuro"
     },
-    
+
     // ELEGANTES
     {
         id: 21,
@@ -247,7 +247,7 @@ const predefinedQRs = [
         background: "#ECEFF1",
         description: "Gris pizarra sobre fondo gris pálido"
     },
-    
+
     // CORPORATIVOS
     {
         id: 31,
@@ -329,7 +329,7 @@ const predefinedQRs = [
         background: "#FFFFFF",
         description: "Gris carbón elegante y sobrio"
     },
-    
+
     // VIBRANTES
     {
         id: 41,
@@ -411,7 +411,7 @@ const predefinedQRs = [
         background: "#F3E5F5",
         description: "Morado vibrante sobre fondo lila"
     },
-    
+
     // PASTELES
     {
         id: 51,
@@ -493,7 +493,7 @@ const predefinedQRs = [
         background: "#EDE7F6",
         description: "Lavanda sobre fondo lila pálido"
     },
-    
+
     // MONOCROMÁTICOS
     {
         id: 61,
@@ -575,7 +575,7 @@ const predefinedQRs = [
         background: "#C5CAE9",
         description: "Índigo sobre fondo índigo claro"
     },
-    
+
     // DEGRADADOS
     {
         id: 71,
@@ -657,7 +657,7 @@ const predefinedQRs = [
         background: "#F9FBE7",
         description: "Verde limón sobre fondo amarillo pálido"
     },
-    
+
     // METÁLICOS
     {
         id: 81,
@@ -739,7 +739,7 @@ const predefinedQRs = [
         background: "#ECEFF1",
         description: "Aluminio sobre fondo gris azulado"
     },
-    
+
     // NEÓN
     {
         id: 91,
@@ -828,26 +828,26 @@ function loadPredefinedQRs() {
     const container = document.getElementById('predefined-qr-container');
     const categoriesContainer = document.querySelector('.predefined-categories');
     let currentCategory = 'all';
-    
+
     // Limpiar los botones de categoría existentes
     categoriesContainer.innerHTML = '';
-    
+
     // Crear botón "Todos"
     const allButton = document.createElement('button');
     allButton.className = 'category-btn active';
     allButton.setAttribute('data-category', 'all');
     allButton.textContent = 'Todos';
     categoriesContainer.appendChild(allButton);
-    
+
     // Obtener categorías únicas
     const uniqueCategories = [...new Set(predefinedQRs.map(qr => qr.category))];
-    
+
     // Crear botones para cada categoría única
     uniqueCategories.forEach(category => {
         const button = document.createElement('button');
         button.className = 'category-btn';
         button.setAttribute('data-category', category);
-        
+
         // Establecer el texto del botón según la categoría
         switch (category) {
             case 'primarios': button.textContent = 'Colores Primarios'; break;
@@ -863,26 +863,26 @@ function loadPredefinedQRs() {
             case 'neon': button.textContent = 'Neón'; break;
             default: button.textContent = category.charAt(0).toUpperCase() + category.slice(1);
         }
-        
+
         categoriesContainer.appendChild(button);
     });
-    
+
     // Función para renderizar los QR según la categoría
     function renderQRs(category) {
         // Limpiar el contenedor
         container.innerHTML = '';
-        
+
         // Filtrar los QR según la categoría
-        const filteredQRs = category === 'all' 
-            ? predefinedQRs 
+        const filteredQRs = category === 'all'
+            ? predefinedQRs
             : predefinedQRs.filter(qr => qr.category === category);
-        
+
         // Si no hay QR en esta categoría
         if (filteredQRs.length === 0) {
             container.innerHTML = '<div class="loading-qr">No hay estilos predefinidos en esta categoría.</div>';
             return;
         }
-        
+
         // Renderizar cada QR
         filteredQRs.forEach(qr => {
             const qrItem = document.createElement('div');
@@ -890,12 +890,12 @@ function loadPredefinedQRs() {
             qrItem.setAttribute('data-id', qr.id);
             qrItem.setAttribute('data-color', qr.color);
             qrItem.setAttribute('data-background', qr.background);
-            
+
             // Crear un mini QR para la vista previa
             const canvas = document.createElement('canvas');
             canvas.width = 80;
             canvas.height = 80;
-            
+
             // Generar el QR de ejemplo
             new QRious({
                 element: canvas,
@@ -905,40 +905,41 @@ function loadPredefinedQRs() {
                 background: qr.background || '#FFFFFF',
                 foreground: qr.color || '#000000'
             });
-            
+
             const title = document.createElement('p');
             title.className = 'title';
             title.textContent = qr.title;
-            
+
             qrItem.appendChild(canvas);
             qrItem.appendChild(title);
-            
+
             // Evento al hacer clic en un estilo predefinido
             qrItem.addEventListener('click', () => {
-                // Obtener el contenido actual del textarea
-                const currentContent = document.getElementById('qr-text').value;
-                
                 // Establecer los colores según el estilo seleccionado
-                document.getElementById('qr-color').value = qr.color;
-                document.getElementById('qr-bg-color').value = qr.background;
-                
-                // Generar el QR con el contenido actual y los nuevos colores
-                generateQRCode();
-                
-                // Desplazarse al área de resultado
-                document.querySelector('.result-section').scrollIntoView({ behavior: 'smooth' });
-                
-                // Mostrar mensaje
-                showMessage(`Estilo "${qr.title}" aplicado`, 'success');
+                const colorInput = document.getElementById('qr-color');
+                const bgInput = document.getElementById('qr-bg-color');
+
+                if (colorInput) colorInput.value = qr.color;
+                if (bgInput) bgInput.value = qr.background;
+
+                // Generar el QR con los nuevos colores si existe la función
+                if (typeof generateQRCode === 'function') {
+                    generateQRCode();
+                }
+
+                // Mostrar mensaje si existe la función
+                if (typeof showMessage === 'function') {
+                    showMessage(`Estilo "${qr.title}" aplicado`, 'success');
+                }
             });
-            
+
             container.appendChild(qrItem);
         });
     }
-    
+
     // Inicializar con todos los QR
     renderQRs(currentCategory);
-    
+
     // Manejar clics en los botones de categoría
     const categoryButtons = document.querySelectorAll('.category-btn');
     categoryButtons.forEach(button => {
@@ -946,10 +947,13 @@ function loadPredefinedQRs() {
             // Actualizar botones activos
             categoryButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            
+
             // Actualizar categoría actual y renderizar
             currentCategory = button.getAttribute('data-category');
             renderQRs(currentCategory);
         });
     });
 }
+
+// Inicializar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', loadPredefinedQRs);
