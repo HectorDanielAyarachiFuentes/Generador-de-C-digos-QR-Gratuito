@@ -53,6 +53,34 @@ document.addEventListener('DOMContentLoaded', () => {
         updateThemeIcon(newTheme);
     });
 
+    // About Me Modal Logic
+    const aboutMeBtn = document.getElementById('about-me-btn');
+    const aboutModal = document.getElementById('about-modal');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const bgMusic = document.getElementById('bg-music');
+
+    if (aboutMeBtn && aboutModal && closeModalBtn && bgMusic) {
+        aboutMeBtn.addEventListener('click', () => {
+            aboutModal.classList.add('active');
+            bgMusic.volume = 0.5;
+            bgMusic.play().catch(e => console.log('Audio playback failed', e));
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            aboutModal.classList.remove('active');
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+        });
+
+        aboutModal.addEventListener('click', (e) => {
+            if (e.target === aboutModal) {
+                aboutModal.classList.remove('active');
+                bgMusic.pause();
+                bgMusic.currentTime = 0;
+            }
+        });
+    }
+
     // Tab Switching
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {

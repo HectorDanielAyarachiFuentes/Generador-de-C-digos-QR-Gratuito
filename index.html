@@ -22,6 +22,10 @@
                     <i class="fas fa-qrcode"></i>
                     <span>QR Generator</span>
                 </div>
+                <!-- About Me Button -->
+                <button id="about-me-btn" class="about-me-btn" title="Sobre mí">
+                    <i class="fas fa-paw"></i>
+                </button>
                 <button id="theme-toggle" class="theme-btn" aria-label="Toggle Dark Mode">
                     <i class="fas fa-moon"></i>
                 </button>
@@ -243,6 +247,28 @@
 <script src="js/predefined.js"></script>
 <script src="js/script.js"></script>
 <!-- Removed older scripts likely not needed with new logic or handled efficiently in script.js -->
+<!-- About Me Modal -->
+<div id="about-modal" class="modal-overlay">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="about-card">
+            <div class="image-container">
+                <img src="Creditos Dulce/Dulcetriste.png" alt="Perrito Triste" id="about-image">
+            </div>
+            <h2>Hector Daniel Ayarachi Fuentes</h2>
+            <p class="poem">"Aunque la tristeza nuble la mirada,<br>el corazón leal siempre encuentra la luz."</p>
+            <div class="audio-control">
+                <p><i class="fas fa-music"></i> Reproduciendo melodía...</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Audio Element -->
+<audio id="bg-music" loop>
+    <source src="Creditos Dulce/Perrito Payaso en la Silla DULCE - SUNO.mp3" type="audio/mp3">
+    Tu navegador no soporta el elemento de audio.
+</audio>
+
 </body>
 
 </html>
